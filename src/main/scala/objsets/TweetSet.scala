@@ -218,14 +218,20 @@ object GoogleVsApple {
   val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
   val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
 
-  lazy val googleTweets: TweetSet = ???
-  lazy val appleTweets: TweetSet = ???
+  lazy val googleTweets: TweetSet = TweetReader.allTweets.filter(tweet => containsKeywords(tweet, google))
+  lazy val appleTweets: TweetSet = TweetReader.allTweets.filter(tweet => containsKeywords(tweet, apple))
+
+  def containsKeywords(tweet: Tweet, list: List[String]): Boolean = {
+    if (list.isEmpty) false
+    else if (tweet.text contains list.head) true
+    else containsKeywords(tweet, list.tail)
+  }
 
   /**
     * A list of all tweets mentioning a keyword from either apple or google,
     * sorted by the number of retweets.
     */
-  lazy val trending: TweetList = ???
+  lazy val trending: TweetList = googleTweets union appleTweets descendingByRetweet
 }
 
 object Main extends App {
