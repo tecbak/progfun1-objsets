@@ -1,5 +1,7 @@
 package objsets
 
+import java.util.NoSuchElementException
+
 import TweetReader._
 
 /**
@@ -65,7 +67,7 @@ abstract class TweetSet {
     * Question: Should we implment this method here, or should it remain abstract
     * and be implemented in the subclasses?
     */
-  def mostRetweeted: Tweet = ???
+  def mostRetweeted: Tweet
 
   /**
     * Returns a list containing all tweets of this set, sorted by retweet count
@@ -76,7 +78,9 @@ abstract class TweetSet {
     * Question: Should we implment this method here, or should it remain abstract
     * and be implemented in the subclasses?
     */
-  def descendingByRetweet: TweetList = ???
+  def descendingByRetweet: TweetList
+
+  def isEmpty: Boolean
 
   /**
     * The following methods are already implemented
@@ -111,6 +115,12 @@ class Empty extends TweetSet {
 
   def union(that: TweetSet): TweetSet = that
 
+  def mostRetweeted: Tweet = throw new NoSuchElementException
+
+  def isEmpty: Boolean = true
+
+  def descendingByRetweet: TweetList = Nil
+
   /**
     * The following methods are already implemented
     */
@@ -135,6 +145,20 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
   def union(that: TweetSet): TweetSet =
     left union (right union that) incl elem
+
+  def mostRetweeted: Tweet = {
+    val tweet = if (left.isEmpty) elem else max(left.mostRetweeted, elem)
+    if (right.isEmpty) tweet else max(right.mostRetweeted, tweet)
+  }
+
+  def max(first: Tweet, second: Tweet): Tweet =
+    if (first.retweets > second.retweets) first
+    else second
+
+  def descendingByRetweet: TweetList =
+    new Cons(mostRetweeted, remove(mostRetweeted).descendingByRetweet)
+
+  def isEmpty: Boolean = false
 
   /**
     * The following methods are already implemented
